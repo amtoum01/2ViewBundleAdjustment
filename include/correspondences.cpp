@@ -70,7 +70,7 @@ void GetCorrespondence::writeCorrToFile(std::vector<Correspondence>& Corr){
 void GetCorrespondence::readCorrFromFile(std::vector<Correspondence>& Corr){
     std::ifstream input;
     Corr.clear();
-    input.open("/Users/amtouti/Documents/SFM/build/correspondesnces.txt");
+    input.open("/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/build/correspondesnces.txt");
     cv::String line;
     while(std::getline(input, line) && !line.empty()){
         std::istringstream ss(line);

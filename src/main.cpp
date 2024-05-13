@@ -6,8 +6,9 @@
 #include "preprocess.hpp"
 
 int main() {
-    // Load the image   
-    cv::String folder = "/Users/amtouti/Documents/SFM/3d_sample_data_set_sofa/3D_sofas/";
+    // Load the image 
+    
+    cv::String folder = "/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/3d_sample_data_set_sofa/3D_sofas";
     std::vector<MouseCallbackParams*> control_points;
     std::vector<cv::Point3f> XYZ_control_points;
     ControlPoints processor;
@@ -15,15 +16,18 @@ int main() {
     bool data_ready = 1;
     bool debug = 0;
     bool get_more_correspondences = 0;
+    
     processor.processControlPoints(folder, control_points, XYZ_control_points, data_ready); 
+    
 
     if(debug){
         processor.printControlPixels(control_points);
         processor.printControlXYZ(XYZ_control_points);
     }
+    
 
-    cv::Mat img1 = cv::imread("/Users/amtouti/Documents/SFM/3d_sample_data_set_sofa/3D_sofas/IMG_1838.jpeg");
-    cv::Mat img2 = cv::imread("/Users/amtouti/Documents/SFM/3d_sample_data_set_sofa/3D_sofas/IMG_1839.jpeg");
+    cv::Mat img1 = cv::imread("/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/3d_sample_data_set_sofa/3D_sofas/IMG_1838.jpeg");
+    cv::Mat img2 = cv::imread("/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/3d_sample_data_set_sofa/3D_sofas/IMG_1839.jpeg");
 
     std::vector<Correspondence> Corr;
 
@@ -39,6 +43,7 @@ int main() {
         Correspond.writeCorrToFile(Corr);
 
     }
+     
 
     MouseCallbackParams* last_image = new MouseCallbackParams;
     std::vector<cv::Point2i> control_points_pixel;
@@ -69,7 +74,6 @@ int main() {
                  fx, skew, cx,
                  0, fy, cy,
                  0, 0, 1);
-
 
     cv::Mat essential_matrix =  cv::findEssentialMat(correspondence_p1, correspondence_p2, K, 
                                                      cv::RANSAC, 0.999, 3.0, 1000);	

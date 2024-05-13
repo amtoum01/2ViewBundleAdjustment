@@ -19,8 +19,9 @@ void ControlPoints::writeToFile(std::vector<MouseCallbackParams*> control_points
 void ControlPoints::readFromFile(std::vector<MouseCallbackParams*>& control_points){
 
     std::ifstream input;
-    input.open("/Users/amtouti/Documents/SFM/build/control_points.txt");
-
+    
+    input.open("/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/3d_sample_data_set_sofa/gcp calc sofa.txt");
+    
     cv::String line;
     cv::String line_copy;
     MouseCallbackParams* image_data = new MouseCallbackParams;
@@ -29,7 +30,10 @@ void ControlPoints::readFromFile(std::vector<MouseCallbackParams*>& control_poin
     int len = 0;
     int start = 1;
 
+    
+
     while(input.peek() != EOF){
+         
         std::getline(input, line);
         if(len == 0){
             if(start == 0){
@@ -41,10 +45,12 @@ void ControlPoints::readFromFile(std::vector<MouseCallbackParams*>& control_poin
             
         }
         else if(len > 1 && len < 70){
-            point.number = stoi(line);
+            
+            point.number = std::stoi(line);
             image_data->dataPoints.push_back(point);
         }
         else{
+            
             line_copy = line;
             line_copy.erase(std::remove(line_copy.begin(), line_copy.end(), '['), line_copy.end());
             line_copy.erase(std::remove(line_copy.begin(), line_copy.end(), ']'), line_copy.end());
@@ -65,7 +71,7 @@ void ControlPoints::readFromFile(std::vector<MouseCallbackParams*>& control_poin
 
 void ControlPoints::readXYZFromFile(std::vector<cv::Point3f>& XYZ_control_points){
 
-    cv::String XYZ_file = "/Users/amtouti/Documents/SFM/3d_sample_data_set_sofa/gcp calc sofa.txt";
+    cv::String XYZ_file = "/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/3d_sample_data_set_sofa/gcp calc sofa.txt";
     std::ifstream input;
     input.open(XYZ_file);
     cv::String line;
@@ -133,18 +139,24 @@ void ControlPoints::processControlPoints(const cv::String& folder, std::vector<M
     
     std::vector<cv::String> filenames; 
     cv::glob(folder, filenames);
+    
 
     readXYZFromFile(XYZ_control_points);
+    
 
     
 
     if(!data_ready){ 
-
+        
         for(const auto& file: filenames){
             cv::Mat image = cv::imread(file);
 
+            
+
             cv::namedWindow("Image");
             cv::imshow("Image", image);
+
+            
 
             std::vector<DataPoint> dataPoints;
 
@@ -152,6 +164,7 @@ void ControlPoints::processControlPoints(const cv::String& folder, std::vector<M
             args->image = image;
             args->dataPoints = dataPoints;
             args->img_num = file;
+            
                 
             
             cv::setMouseCallback("Image", onMouse, args);
@@ -166,6 +179,8 @@ void ControlPoints::processControlPoints(const cv::String& folder, std::vector<M
             control_points.push_back(args);
         }
 
+        
+
         for (const auto& params : control_points) {
             std::cout << params->img_num << std::endl;
             for(const auto& data: params->dataPoints){
@@ -177,6 +192,8 @@ void ControlPoints::processControlPoints(const cv::String& folder, std::vector<M
     }
 
     else{
+        
         readFromFile(control_points);
+        
     }
 }
