@@ -12,11 +12,6 @@ void getHomogneousPoints(const cv::Mat& world_points, const std::vector<Correspo
     std::cout << "HOWW MANY POINTSSSS " << num_points << std::endl;
 
     cv::Mat world_3d;
-    std::cout << "WORLD HOM POINTS SIZE " << world_points.size << std::endl;
-    // cv::convertPointsFromHomogeneous(world_points.t(), world_3d);
-    std::cout << "WPRLD POINTS SIZE " << world_3d.size << std::endl;
-    
-    
 
     for (int i = 0; i < num_points; ++i) {
 
@@ -31,70 +26,18 @@ void getHomogneousPoints(const cv::Mat& world_points, const std::vector<Correspo
                                                      world_points.col(i).at<double>(2),
                                                      world_points.col(i).at<double>(3));
             
-            // cv::Vec4d homogeneous_point = cv::Vec4d(world_points.col(i).at<double>(0),
-            //                                         world_points.col(i).at<double>(1),
-            //                                         world_points.col(i).at<double>(2),
-            //                                         1.0);
-            // std::cout << " x cordinate " << world_points.col(i).at<double>(0) << " " << world_points.col(i).at<double>(0) / world_points.col(i).at<double>(3) << " " << world_3d.at<cv::Point3d>(i).x << std::endl;
-            // std::cout << " y cordinate " << world_points.col(i).at<double>(1) << " " << world_points.col(i).at<double>(1) / world_points.col(i).at<double>(3) << " " << world_3d.at<cv::Point3d>(i).y << std::endl;
-            // std::cout << " z cordinate " << world_points.col(i).at<double>(2) << " " << world_points.col(i).at<double>(2) / world_points.col(i).at<double>(3) << " " << world_3d.at<cv::Point3d>(i).z << std::endl << std::endl;
             
             homogeneous_point /= world_points.col(i).at<double>(3);
-            // homogeneous_point /= 1.0;
+
             cv::Mat hom_xyz(homogeneous_point);
             homogeneous_points.push_back(hom_xyz);
-            disp_point.x = world_points.col(i).at<double>(0) / world_points.col(i).at<double>(3);
-            disp_point.y = world_points.col(i).at<double>(1) / world_points.col(i).at<double>(3);
-            disp_point.z = world_points.col(i).at<double>(2) / world_points.col(i).at<double>(3);
 
-            // disp_point.x = homogeneous_point[0];
-            // disp_point.y = homogeneous_point[1];
-            // disp_point.z = homogeneous_point[2];
+            disp_point.x = homogeneous_point[0];
+            disp_point.y = homogeneous_point[1];
+            disp_point.z = homogeneous_point[2];
 
             disp_points.push_back(disp_point);
         }
-    }
-}
-
-void getHomogneousPoints_(const cv::Mat& world_points, const std::vector<Correspondence>& Corr, const cv::Mat& img, std::vector<cv::Mat>& homogeneous_points, std::vector<cv::Point3f>& disp_points, std::vector<cv::Vec3b>& colors){
-    
-    int num_points = world_points.cols;
-
-    cv::Point3f disp_point;
-    homogeneous_points.clear();
-    disp_points.clear();
-    colors.clear();
-
-    std::cout << "HOWW MANY POINTSSSS " << num_points << std::endl;
-    
-    
-
-    for (int i = 0; i < num_points; ++i) {
-        
-        colors.push_back(img.at<cv::Vec3b>(Corr[i].p1.y, Corr[i].p1.x));
-
-        // cv::Vec4d homogeneous_point = cv::Vec4d(world_points.col(i).at<double>(0),
-        //                                          world_points.col(i).at<double>(1),
-        //                                          world_points.col(i).at<double>(2),
-        //                                          world_points.col(i).at<double>(3));
-        
-         cv::Vec4d homogeneous_point = cv::Vec4d(world_points.col(i).at<double>(0),
-                                                 world_points.col(i).at<double>(1),
-                                                 world_points.col(i).at<double>(2),
-                                                 1.0);
-        // homogeneous_point /= world_points.col(i).at<double>(3);
-        // homogeneous_point /= 1.0;
-        cv::Mat hom_xyz(homogeneous_point);
-        homogeneous_points.push_back(hom_xyz);
-        disp_point.x = world_points.col(i).at<double>(0);
-        disp_point.y = world_points.col(i).at<double>(1);
-        disp_point.z = world_points.col(i).at<double>(2);
-
-        // disp_point.x = homogeneous_point[0];
-        // disp_point.y = homogeneous_point[1];
-        // disp_point.z = homogeneous_point[2];
-
-        disp_points.push_back(disp_point);
     }
 }
 
