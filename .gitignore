@@ -3,3 +3,4 @@ build/
 .ipynb_checkpoints/
 .vscode/
 src/main.dSYM/
+Battery/

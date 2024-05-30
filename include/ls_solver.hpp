@@ -9,14 +9,16 @@
 class LS_SOLVER
 {
 private:
-    int ext_2_startidx = 4;
-    int hom_pts_startidx = 4 + 5;
+    // int ext_2_startidx = 4;
+    int ext_2_startidx = 0;
+    // int hom_pts_startidx = 4 + 5;
+    int hom_pts_startidx = 5;
     std::vector<Correspondence> Corr;
     std::vector<std::pair<int,int>> K_ind = {{0,0},{1,1},{0,2},{1,2}};
 
     int num_points;
     int no_params;
-    int no_iter = 5;
+    int no_iter = 10;
 
     cv::Mat jacob;
     cv::Mat delta;

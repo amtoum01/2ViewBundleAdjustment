@@ -59,7 +59,8 @@ void GetCorrespondence::getCorrespondence(std::vector<Correspondence>& Corr){
 
 void GetCorrespondence::writeCorrToFile(std::vector<Correspondence>& Corr){
     std::ofstream input;
-    input.open("correspondesnces.txt");
+    // input.open("correspondesnces.txt");
+    input.open("correspondesnces_bat.txt");
     for(const auto& corr : Corr){
         input << corr.p1.x << " " << corr.p1.y << " " << corr.p2.x << " " << corr.p2.y <<std::endl;
     }
@@ -70,7 +71,8 @@ void GetCorrespondence::writeCorrToFile(std::vector<Correspondence>& Corr){
 void GetCorrespondence::readCorrFromFile(std::vector<Correspondence>& Corr){
     std::ifstream input;
     Corr.clear();
-    input.open("/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/build/correspondesnces.txt");
+    // input.open("/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/build/correspondesnces.txt");
+    input.open("/Users/amtouti/Documents/SFM/2ViewBAGivenCorresspondence/build/correspondesnces_bat.txt");
     cv::String line;
     while(std::getline(input, line) && !line.empty()){
         std::istringstream ss(line);

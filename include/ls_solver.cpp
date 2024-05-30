@@ -10,6 +10,13 @@ cv::Point2d LS_SOLVER::get_err(cv::Point2d p, cv::Mat transformation_matrix, cv:
     p_est_.x = p_est.at<double>(0);
     p_est_.y = p_est.at<double>(1);
     cv::Point2d diff = p - p_est_;
+    // if(fabs(diff.x) > 500){
+    //     diff.x = 0.0;
+    // }
+    // if(fabs(diff.y) > 500){
+    //     diff.y = 0.0;
+    // }
+    // std::cout << diff << std::endl;
     return diff;
 
 
@@ -104,25 +111,25 @@ void LS_SOLVER::computeJacob(){
     cv::Mat rot_cp;
     cv::Mat jacob_rod;
 
-    double delta = 0.001;
+    double delta = 0.0001;
     int jacop_split = 2 * num_points;
 
     for(int i=0; i<Corr.size(); i++){
         cv::Point2d err_1 = get_err(Corr[i].p1, transformation_matrix_1, K, hom_XYZ[i]);
         cv::Point2d err_2 = get_err(Corr[i].p2, transformation_matrix_2, K, hom_XYZ[i]);
         
-        for(int o=0; o<4; o++){
-            K.copyTo(K_cp);
-            K_cp.at<double>(K_ind[o].first, K_ind[o].second) += delta;
-            err_1_mod = get_err(Corr[i].p1, transformation_matrix_1, K_cp, hom_XYZ[i]);
-            err_2_mod = get_err(Corr[i].p2, transformation_matrix_2, K_cp, hom_XYZ[i]);
-            deriv_1 = (err_1_mod - err_1) / delta;
-            deriv_2 = (err_2_mod - err_2) / delta;
-            jacob.at<double>(2*i, o) = deriv_1.x;
-            jacob.at<double>(2*i+1, o) = deriv_1.y;
-            jacob.at<double>(2*i + jacop_split, o) = deriv_2.x;
-            jacob.at<double>(2*i + jacop_split + 1, o) = deriv_2.y;
-        }
+        // for(int o=0; o<4; o++){
+        //     K.copyTo(K_cp);
+        //     K_cp.at<double>(K_ind[o].first, K_ind[o].second) += delta;
+        //     err_1_mod = get_err(Corr[i].p1, transformation_matrix_1, K_cp, hom_XYZ[i]);
+        //     err_2_mod = get_err(Corr[i].p2, transformation_matrix_2, K_cp, hom_XYZ[i]);
+        //     deriv_1 = (err_1_mod - err_1) / delta;
+        //     deriv_2 = (err_2_mod - err_2) / delta;
+        //     jacob.at<double>(2*i, o) = deriv_1.x;
+        //     jacob.at<double>(2*i+1, o) = deriv_1.y;
+        //     jacob.at<double>(2*i + jacop_split, o) = deriv_2.x;
+        //     jacob.at<double>(2*i + jacop_split + 1, o) = deriv_2.y;
+        // }
 
         for(int k=0; k<3; k++){
             transformation_matrix_2.copyTo(transformation_matrix_2_cp);
@@ -162,15 +169,27 @@ void LS_SOLVER::computeJacob(){
             jacob.at<double>(2*i + jacop_split + 1, hom_pts_startidx + 3*i + j) = deriv_2.y;
         }
     }
+
+    // cv::Mat u, vt, w;
+    cv::SVD svd(jacob);
+    int rank = 0;
+    for(int i=0; i<svd.w.rows; i++){
+        if(svd.w.at<double>(i) > 1e-8){
+            rank++;
+        }
+    }
+    std::cout << "RANK OF JACOBIAN IS: " << rank << std::endl;
+    std::string filename = "jacob.csv";
+    exportToCSV(jacob, filename);
 }
 
 void LS_SOLVER::getStateVec(){
     
-    std::vector<std::pair<int,int>> K_ind = {{0,0},{1,1},{0,2},{1,2}};
+    // std::vector<std::pair<int,int>> K_ind = {{0,0},{1,1},{0,2},{1,2}};
    
-    for(int i=0; i<4; i++){
-        x.at<double>(i) = K.at<double>(K_ind[i].first, K_ind[i].second);
-    }
+    // for(int i=0; i<4; i++){
+    //     x.at<double>(i) = K.at<double>(K_ind[i].first, K_ind[i].second);
+    // }
 
     cv::Rect rot_roi(0, 0, 3, 3);
     cv::Mat rot_2 = transformation_matrix_2(rot_roi);
@@ -195,13 +214,13 @@ void LS_SOLVER::getStateVec(){
 void LS_SOLVER::stateVecToMat(){
     
 
-    for(int i=0; i<4; i++){
-        K.at<double>(K_ind[i].first, K_ind[i].second) = x.at<double>(i);
-    }
+    // for(int i=0; i<4; i++){
+    //     K.at<double>(K_ind[i].first, K_ind[i].second) = x.at<double>(i);
+    // }
 
     cv::Rect rot_roi(0, 0, 3, 3);
     cv::Mat rot_2;
-    cv::Mat rod_2 = x.rowRange(4,7);
+    cv::Mat rod_2 = x.rowRange(0,3);
 
     cv::Rodrigues(rod_2, rot_2);
 
@@ -226,6 +245,7 @@ void LS_SOLVER::solveLS(){
     cv::Mat Hess;
     cv::Mat residuals = cv::Mat::zeros(4*num_points, 1, CV_64F);
     double err;
+    std::string x_file = "x.csv";
 
     for(int i=0; i<no_iter; i++){
         std::cout << " Iter: " << i << std::endl;
@@ -236,15 +256,28 @@ void LS_SOLVER::solveLS(){
         Hess = jacob.t() * jacob;
         cv::solve(Hess, -jacob.t() * residuals, delta, cv::DECOMP_SVD);
         getStateVec();
+        exportToCSV(x, x_file);
         x += delta;
         stateVecToMat();
+        // std::cout << "INTRINSIC MATRIX K = " << K << std::endl;
 
     }
+    cv::Mat Hess_inv;
+    cv::invert(Hess, Hess_inv, cv::DECOMP_SVD);
+
+    std::string delta_file = "delta.csv";
+    std::string Hess_file = "Hess.csv";
+    std::string Hess_inv_file = "Hess_inv.csv";
+    exportToCSV(delta, delta_file);
+    exportToCSV(Hess, Hess_file);
+    exportToCSV(Hess_inv, Hess_inv_file);
+
     
 }
 
 LS_SOLVER::LS_SOLVER(std::vector<Correspondence> Corr, std::vector<cv::Mat> hom_XYZ, cv::Mat transformation_matrix_1, cv::Mat transformation_matrix_2, cv::Mat K):
     Corr(Corr), hom_XYZ(hom_XYZ), transformation_matrix_1(transformation_matrix_1), transformation_matrix_2(transformation_matrix_2), K(K){
         num_points = Corr.size();
-        no_params = 4 + 5 + 3*num_points;
+        // no_params = 4 + 5 + 3*num_points;
+        no_params = 5 + 3*num_points;
     } 
